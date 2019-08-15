@@ -2,6 +2,8 @@
 fill struct filed from XML easily in go,It is very important that it support interface field.
 
 The xmlDeserializer package is a lightweight, pure go package that deserializer XML to an object. Its design was inspired by my previous job about java xml.
+Because golang's reflection function is not as powerful as java,I found a tool that can deserialize the interface and couldn't find it for a long time.
+Now I write one myself with registered factory mode.
 
 Some of the package's capabilities and features:
 
@@ -13,8 +15,9 @@ Some of the package's capabilities and features:
 	Support for deep recursive deserialization.
 	
 Deserializer an XML document
-	The following example deserializer an XML document to an object with interfaces.
+The following example deserializer an XML document to an object with interfaces.
 
+	//code here
 	type RootModel struct {
 		XMLName xml.Name `xml:"Root"`
 
@@ -34,59 +37,60 @@ Deserializer an XML document
 	if err != nil{
 		t.Fail()
 	}
-	
-	xml string:
+
+source xml string below:
 	<?xml version="1.0" encoding="UTF-8"?>
 	<Root>
-		<Rules>
-			<EqualRuleB>
-				<Name>arr1</Name>
-				<Match>callin1</Match>
-			</EqualRuleB>
-			<EqualRuleB>
-				<Name>arr2</Name>
-				<Match>callin2</Match>
-			</EqualRuleB>
-			<EqualRuleB>
-				<Name>arr3</Name>
-				<Match>callin3</Match>
-			</EqualRuleB>
-		</Rules>
+	  <Rules>
+		<EqualRuleB>
+		  <Name>arr1</Name>
+		  <Match>callin1</Match>
+		</EqualRuleB>
+		<EqualRuleB>
+		  <Name>arr2</Name>
+		  <Match>callin2</Match>
+		</EqualRuleB>
+		<EqualRuleB>
+		  <Name>arr3</Name>
+		  <Match>callin3</Match>
+		</EqualRuleB>
+	  </Rules>
 
 		<EqualRuleA>
-			<Name>singleInstance</Name>
-			<Match>callin</Match>
+		  <Name>singleInstance</Name>
+		  <Match>callin</Match>
 		</EqualRuleA>
 
 		<NotifyParser>
-			<Name>pppp</Name>
+		  <Name>pppp</Name>
 		</NotifyParser>
 		<NotifyParser>
-			<Name>mmmm</Name>
+		  <Name>mmmm</Name>
 		</NotifyParser>
 		<CallParser>
-			<Index>111</Index>
+		  <Index>111</Index>
 		</CallParser>
 		<CallParser>
-			<Index>222</Index>
+		  <Index>222</Index>
 		</CallParser>
 
 		<EqualRulers>
-			<EqualRuleA>
-				<Name>sub1</Name>
-				<Match>a1</Match>
-			</EqualRuleA>
-			<EqualRuleB>
-				<Name>sub2</Name>
-				<Match>b2</Match>
-			</EqualRuleB>
-			<EqualRuleA>
-				<Name>sub3</Name>
-				<Match>a3</Match>
-			</EqualRuleA>
+		  <EqualRuleA>
+		    <Name>sub1</Name>
+			<Match>a1</Match>
+		</EqualRuleA>
+		<EqualRuleB>
+			<Name>sub2</Name>
+			<Match>b2</Match>
+		</EqualRuleB>
+		<EqualRuleA>
+			<Name>sub3</Name>
+			<Match>a3</Match>
+		</EqualRuleA>
 		</EqualRulers>
 	</Root>
 	
-Contributing
-	This project accepts contributions. Just fork the repo and submit a pull request!
-	Please forgive me for my poor English.	author-xukuan
+Contributing:
+This project accepts contributions. Just fork the repo and submit a pull request!
+
+Please forgive me for my poor English.	author-xukuan
