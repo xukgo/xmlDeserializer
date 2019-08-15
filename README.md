@@ -42,52 +42,49 @@ source xml string below:
 
 	<?xml version="1.0" encoding="UTF-8"?>
 	<Root>
-	  <Rules>
-		<EqualRuleB>
-		  <Name>arr1</Name>
-		  <Match>callin1</Match>
-		</EqualRuleB>
-		<EqualRuleB>
-		  <Name>arr2</Name>
-		  <Match>callin2</Match>
-		</EqualRuleB>
-		<EqualRuleB>
-		  <Name>arr3</Name>
-		  <Match>callin3</Match>
-		</EqualRuleB>
-	  </Rules>
-
+		<Rules>
+			<EqualRuleB>
+				<Name>arr1</Name>
+				<Match>callin1</Match>
+			</EqualRuleB>
+			<EqualRuleB>
+				<Name>arr2</Name>
+				<Match>callin2</Match>
+			</EqualRuleB>
+			<EqualRuleB>
+				<Name>arr3</Name>
+				<Match>callin3</Match>
+			</EqualRuleB>
+		</Rules>
 		<EqualRuleA>
-		  <Name>singleInstance</Name>
-		  <Match>callin</Match>
+			<Name>singleInstance</Name>
+			<Match>callin</Match>
 		</EqualRuleA>
-
 		<NotifyParser>
-		  <Name>pppp</Name>
+			<Name>pppp</Name>
 		</NotifyParser>
 		<NotifyParser>
-		  <Name>mmmm</Name>
+			<Name>mmmm</Name>
 		</NotifyParser>
 		<CallParser>
-		  <Index>111</Index>
+			<Index>111</Index>
 		</CallParser>
 		<CallParser>
-		  <Index>222</Index>
+			<Index>222</Index>
 		</CallParser>
-
 		<EqualRulers>
-		  <EqualRuleA>
-		    <Name>sub1</Name>
-			<Match>a1</Match>
-		</EqualRuleA>
-		<EqualRuleB>
-			<Name>sub2</Name>
-			<Match>b2</Match>
-		</EqualRuleB>
-		<EqualRuleA>
-			<Name>sub3</Name>
-			<Match>a3</Match>
-		</EqualRuleA>
+			<EqualRuleA>
+				<Name>sub1</Name>
+				<Match>a1</Match>
+			</EqualRuleA>
+			<EqualRuleB>
+				<Name>sub2</Name>
+				<Match>b2</Match>
+			</EqualRuleB>
+			<EqualRuleA>
+				<Name>sub3</Name>
+				<Match>a3</Match>
+			</EqualRuleA>
 		</EqualRulers>
 	</Root>
 	
