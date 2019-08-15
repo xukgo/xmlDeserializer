@@ -39,6 +39,7 @@ The following example deserializer an XML document to an object with interfaces.
 	}
 
 source xml string below:
+
 	<?xml version="1.0" encoding="UTF-8"?>
 	<Root>
 	  <Rules>
