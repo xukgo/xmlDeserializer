@@ -1,7 +1,6 @@
-package xmlUtil_test
+package xmlDeserializer
 
 import (
-	"../xmlUtil"
 	"encoding/xml"
 	"testing"
 )
@@ -145,7 +144,7 @@ func TestXmlDeserializer(t *testing.T){
 
 	initXmlInstanceFactory()
 	defer disposeXmlInstanceFactory()
-	xmlDeserializer := xmlUtil.NewDeserializer("Factory", instanceMap)
+	xmlDeserializer := NewDeserializer("Factory", instanceMap)
 	instance := &RootModel{}
 	err := xmlDeserializer.Deserialize([]byte(testXml),instance)
 	if err != nil{

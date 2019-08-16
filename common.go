@@ -1,4 +1,4 @@
-package xmlUtil
+package xmlDeserializer
 
 import (
 	"encoding/xml"
