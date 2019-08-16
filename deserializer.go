@@ -108,6 +108,11 @@ func (this *Deserializer) parsePrefixXmlInterfaceField(root *etree.Element, fiel
 		return err
 	}
 
+	err = this.parseByElement(selectNode, newInstance)
+	if err != nil{
+		return err
+	}
+
 	field.Set(reflect.ValueOf(newInstance))
 	return nil
 }
