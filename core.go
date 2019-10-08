@@ -6,17 +6,17 @@ import (
 	"strings"
 )
 
-func getChildrenByTagName(root *etree.Element, name string)[]*etree.Element{
+func getChildrenByTagName(root *etree.Element, name string) []*etree.Element {
 	var resSlice []*etree.Element
 
 	selectNode := root
-	arr := strings.Split(name,">")
-	for i:=0;i< len(arr);i++{
+	arr := strings.Split(name, ">")
+	for i := 0; i < len(arr); i++ {
 		subName := arr[i]
 		children := selectNode.ChildElements()
-		for _,node := range children{
-			if node.Tag == subName{
-				if i== len(arr)-1{
+		for _, node := range children {
+			if node.Tag == subName {
+				if i == len(arr)-1 {
 					resSlice = append(resSlice, node)
 					continue
 				}
@@ -29,15 +29,15 @@ func getChildrenByTagName(root *etree.Element, name string)[]*etree.Element{
 	return resSlice
 }
 
-func getChildByTagName(root *etree.Element, name string)*etree.Element{
+func getChildByTagName(root *etree.Element, name string) *etree.Element {
 	selectNode := root
-	arr := strings.Split(name,">")
-	for i:=0;i< len(arr);i++{
+	arr := strings.Split(name, ">")
+	for i := 0; i < len(arr); i++ {
 		subName := arr[i]
 		children := selectNode.ChildElements()
-		for _,node := range children{
-			if node.Tag == subName{
-				if i== len(arr)-1{
+		for _, node := range children {
+			if node.Tag == subName {
+				if i == len(arr)-1 {
 					return node
 				}
 				selectNode = node
@@ -49,27 +49,27 @@ func getChildByTagName(root *etree.Element, name string)*etree.Element{
 	return nil
 }
 
-func unmarshalByElement(root *etree.Element,instance interface{})error{
-	xmlStr := GetElementXml(root)
-	err := xml.Unmarshal([]byte(xmlStr),instance)
-	if err != nil{
+func unmarshalByElement(root *etree.Element, instance interface{}) error {
+	xmlStr := GetElementXml(root, true)
+	err := xml.Unmarshal([]byte(xmlStr), instance)
+	if err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func checkIsPrefixXmlTag(codeXmlTag string, prefix string) bool{
+func checkIsPrefixXmlTag(codeXmlTag string, prefix string) bool {
 	facIdx := strings.LastIndex(codeXmlTag, prefix+".")
-	if  facIdx <0{
+	if facIdx < 0 {
 		return false
 	}
 	return true
 }
 
-func getMapTypeNameFromXmlTag(codeXmlTag string, prefix string)string{
+func getMapTypeNameFromXmlTag(codeXmlTag string, prefix string) string {
 	facIdx := strings.LastIndex(codeXmlTag, prefix+".")
-	if  facIdx <0{
+	if facIdx < 0 {
 		return ""
 	}
 	mapTypeName := codeXmlTag[facIdx+len(prefix)+1:]
@@ -79,7 +79,7 @@ func getMapTypeNameFromXmlTag(codeXmlTag string, prefix string)string{
 /*
 return parent line string and tail string
 */
-func parsePrefixXmlTag(codeXmlTag string)([]string,string){
+func parsePrefixXmlTag(codeXmlTag string) ([]string, string) {
 	arr := strings.Split(codeXmlTag, ">")
-	return arr[:len(arr)-1],arr[len(arr)-1]
+	return arr[:len(arr)-1], arr[len(arr)-1]
 }
