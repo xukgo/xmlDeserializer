@@ -8,20 +8,20 @@ import (
 	"strings"
 )
 
-type Deserializer struct{
-	prefix string
+type Deserializer struct {
+	prefix  string
 	factory map[string]map[string]interface{}
 }
 
-func NewDeserializer(prefix string, factory map[string]map[string]interface{}) *Deserializer{
+func NewDeserializer(prefix string, factory map[string]map[string]interface{}) *Deserializer {
 	model := Deserializer{
-		prefix:prefix,
-		factory:factory,
+		prefix:  prefix,
+		factory: factory,
 	}
 	return &model
 }
 
-func (this *Deserializer) Deserialize(xmlContent []byte, instance interface{})error{
+func (this *Deserializer) Deserialize(xmlContent []byte, instance interface{}) error {
 	err := xml.Unmarshal(xmlContent, instance)
 	if err != nil {
 		return err
@@ -32,7 +32,7 @@ func (this *Deserializer) Deserialize(xmlContent []byte, instance interface{})er
 		return err
 	}
 
-	xmlNameString,err := GetXmlName(instance)
+	xmlNameString, err := GetXmlName(instance)
 	if err != nil {
 		return err
 	}
@@ -45,33 +45,33 @@ func (this *Deserializer) Deserialize(xmlContent []byte, instance interface{})er
 }
 
 //codeXmlTag:a>b>Factory.typeName  like this
-func (this *Deserializer) getMatchTagNodes(root *etree.Element, codeXmlTag string)[]*etree.Element{
-	parents,xmlTag := parsePrefixXmlTag(codeXmlTag)
+func (this *Deserializer) getMatchTagNodes(root *etree.Element, codeXmlTag string) []*etree.Element {
+	parents, xmlTag := parsePrefixXmlTag(codeXmlTag)
 	mapTypeName := getMapTypeNameFromXmlTag(xmlTag, this.prefix)
-	if mapTypeName == ""{
+	if mapTypeName == "" {
 		return nil
 	}
 	instanceNames := resolveInstanceNames(this.factory, mapTypeName)
-	if instanceNames == nil || len(instanceNames) == 0{
+	if instanceNames == nil || len(instanceNames) == 0 {
 		return nil
 	}
 
 	selectNode := root
-	for _,tagName := range parents{
+	for _, tagName := range parents {
 		selectNode = getChildByTagName(selectNode, tagName)
-		if selectNode == nil{
+		if selectNode == nil {
 			return nil
 		}
 	}
 
-	for idx := range instanceNames{
+	for idx := range instanceNames {
 		instanceNames[idx] = strings.ToLower(instanceNames[idx])
 	}
 
 	var resArr []*etree.Element
 	children := selectNode.ChildElements()
-	for _,node := range children{
-		if checkStringSliceContains(instanceNames, strings.ToLower(node.Tag)){
+	for _, node := range children {
+		if checkStringSliceContains(instanceNames, strings.ToLower(node.Tag)) {
 			resArr = append(resArr, node)
 		}
 	}
@@ -79,7 +79,7 @@ func (this *Deserializer) getMatchTagNodes(root *etree.Element, codeXmlTag strin
 	return resArr
 }
 
-func (this *Deserializer) parseStrcutPtr(root *etree.Element, instance interface{}, tagName string) error{
+func (this *Deserializer) parseStrcutPtr(root *etree.Element, instance interface{}, tagName string) error {
 	node := getChildByTagName(root, tagName)
 	err := this.parseByElement(node, instance)
 	if err != nil {
@@ -90,26 +90,26 @@ func (this *Deserializer) parseStrcutPtr(root *etree.Element, instance interface
 
 func (this *Deserializer) parsePrefixXmlInterfaceField(root *etree.Element, field reflect.Value, xmlTagName string) error {
 	nodes := this.getMatchTagNodes(root, xmlTagName)
-	if nodes == nil{
+	if nodes == nil {
 		return nil
 	}
-	if len(nodes) != 1{
+	if len(nodes) != 1 {
 		return fmt.Errorf("%s expect one interface node,acutal count is %d", xmlTagName, len(nodes))
 	}
 
 	selectNode := nodes[0]
 	mapTypeName := getMapTypeNameFromXmlTag(xmlTagName, this.prefix)
 	newInstance := resolveInstance(this.factory, mapTypeName, selectNode.Tag)
-	if newInstance == nil{
+	if newInstance == nil {
 		return fmt.Errorf("resolveInstance by %s return nil", xmlTagName)
 	}
-	err := unmarshalByElement(selectNode ,newInstance)
-	if err != nil{
+	err := unmarshalByElement(selectNode, newInstance)
+	if err != nil {
 		return err
 	}
 
 	err = this.parseByElement(selectNode, newInstance)
-	if err != nil{
+	if err != nil {
 		return err
 	}
 
@@ -119,24 +119,24 @@ func (this *Deserializer) parsePrefixXmlInterfaceField(root *etree.Element, fiel
 
 func (this *Deserializer) parsePrefixXmlInterfaceSliceField(root *etree.Element, field reflect.Value, xmlTagName string) error {
 	nodes := this.getMatchTagNodes(root, xmlTagName)
-	if nodes == nil || len(nodes) == 0{
+	if nodes == nil || len(nodes) == 0 {
 		return nil
 	}
 
 	mapTypeName := getMapTypeNameFromXmlTag(xmlTagName, this.prefix)
 	sliceCarrier := make([]reflect.Value, 0)
-	for _,node := range nodes{
+	for _, node := range nodes {
 		newInstance := resolveInstance(this.factory, mapTypeName, node.Tag)
-		if newInstance == nil{
+		if newInstance == nil {
 			return fmt.Errorf("resolveInstance by %s return nil", xmlTagName)
 		}
-		err := unmarshalByElement(node ,newInstance)
-		if err != nil{
+		err := unmarshalByElement(node, newInstance)
+		if err != nil {
 			return err
 		}
 
 		err = this.parseByElement(node, newInstance)
-		if err != nil{
+		if err != nil {
 			return err
 		}
 
@@ -149,24 +149,24 @@ func (this *Deserializer) parsePrefixXmlInterfaceSliceField(root *etree.Element,
 
 func (this *Deserializer) parsePrefixXmlField(root *etree.Element, field reflect.Value, xmlTagName string) error {
 	fieldKind := field.Kind()
-	if fieldKind != reflect.Interface && fieldKind != reflect.Slice{
+	if fieldKind != reflect.Interface && fieldKind != reflect.Slice {
 		return nil
 	}
 
-	if fieldKind == reflect.Interface{
+	if fieldKind == reflect.Interface {
 		err := this.parsePrefixXmlInterfaceField(root, field, xmlTagName)
-		if err != nil{
+		if err != nil {
 			return err
 		}
 	}
 
 	if fieldKind == reflect.Slice {
 		//这里判断必须为nil
-		if !field.IsNil(){
+		if !field.IsNil() {
 			return nil
 		}
 		err := this.parsePrefixXmlInterfaceSliceField(root, field, xmlTagName)
-		if err != nil{
+		if err != nil {
 			return err
 		}
 	}
@@ -175,6 +175,9 @@ func (this *Deserializer) parsePrefixXmlField(root *etree.Element, field reflect
 }
 
 func (this *Deserializer) parseNotPrefixXmlField(root *etree.Element, field reflect.Value, xmlTagName string) error {
+	if !field.CanSet() {
+		return nil
+	}
 	fieldKind := field.Kind()
 	if fieldKind == reflect.Struct {
 		h := field.Addr().Interface()
@@ -185,7 +188,7 @@ func (this *Deserializer) parseNotPrefixXmlField(root *etree.Element, field refl
 	}
 	if fieldKind == reflect.Ptr {
 		//这里判断为nil，跳过空指针
-		if field.IsNil(){
+		if field.IsNil() {
 			return nil
 		}
 
@@ -198,11 +201,11 @@ func (this *Deserializer) parseNotPrefixXmlField(root *etree.Element, field refl
 	}
 	if fieldKind == reflect.Slice {
 		//这里判断为nil，跳过空指针
-		if field.IsNil(){
+		if field.IsNil() {
 			return nil
 		}
 		nodes := getChildrenByTagName(root, xmlTagName)
-		for i:=0;i< field.Len();i++{
+		for i := 0; i < field.Len(); i++ {
 			iv := field.Index(i).Interface()
 			sliceElemKind := reflect.TypeOf(iv).Kind()
 
@@ -228,7 +231,7 @@ func (this *Deserializer) parseNotPrefixXmlField(root *etree.Element, field refl
 	return nil
 }
 
-func (this *Deserializer) parseByElement(root *etree.Element, instance interface{})error{
+func (this *Deserializer) parseByElement(root *etree.Element, instance interface{}) error {
 	var err error
 	v := reflect.ValueOf(instance).Elem() // the struct variable
 
@@ -237,16 +240,16 @@ func (this *Deserializer) parseByElement(root *etree.Element, instance interface
 		theField := v.FieldByName(fieldInfo.Name)
 		fieldKind := theField.Kind()
 		//fmt.Println(fieldKind)
-		if fieldKind != reflect.Ptr  && fieldKind != reflect.Struct && fieldKind != reflect.Interface && fieldKind != reflect.Slice{
+		if fieldKind != reflect.Ptr && fieldKind != reflect.Struct && fieldKind != reflect.Interface && fieldKind != reflect.Slice {
 			continue
 		}
 		fieldType := theField.Type()
 		//fmt.Println(fieldType)
-		if fieldType == xmlNameType{
+		if fieldType == xmlNameType {
 			continue
 		}
 
-		tag := fieldInfo.Tag           // a reflect.StructTag
+		tag := fieldInfo.Tag // a reflect.StructTag
 		xmlTagContent := tag.Get("xml")
 
 		//去掉逗号后面内容 如 `xml:"nodeName,omitempty"`
@@ -254,17 +257,17 @@ func (this *Deserializer) parseByElement(root *etree.Element, instance interface
 		xmlTagName := arr[0]
 
 		//不是factory前缀
-		if !checkIsPrefixXmlTag(xmlTagName, this.prefix){
-			err  = this.parseNotPrefixXmlField(root, theField, xmlTagName)
-			if err != nil{
+		if !checkIsPrefixXmlTag(xmlTagName, this.prefix) {
+			err = this.parseNotPrefixXmlField(root, theField, xmlTagName)
+			if err != nil {
 				return err
 			}
 			continue
 		}
 
 		//下面处理factory前缀的，目前只允许interface和它对应的数组
-		err  = this.parsePrefixXmlField(root, theField, xmlTagName)
-		if err != nil{
+		err = this.parsePrefixXmlField(root, theField, xmlTagName)
+		if err != nil {
 			return err
 		}
 	}
