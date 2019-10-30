@@ -2,6 +2,7 @@ package xmlDeserializer
 
 import (
 	"encoding/xml"
+	"fmt"
 	"testing"
 )
 
@@ -12,22 +13,30 @@ type IParser interface {
 
 //define NotifyParser struct
 type NotifyParser struct {
-	XMLName   xml.Name       `xml:"NotifyParser"`
-	Name	string	`xml:"Name"`
+	XMLName xml.Name `xml:"NotifyParser"`
+	Name    string   `xml:"Name"`
 }
 
-func (this *NotifyParser)Parse(string) error{
+func (this *NotifyParser) Parse(string) error {
 	return nil
+}
+
+func (this *NotifyParser) AfterUnmarshal() {
+	fmt.Println("NotifyParser AfterUnmarshal")
 }
 
 //define NotifyParser struct
 type CallParser struct {
-	XMLName   xml.Name       `xml:"CallParser"`
-	Index	int	`xml:"Index"`
+	XMLName xml.Name `xml:"CallParser"`
+	Index   int      `xml:"Index"`
 }
 
-func (this *CallParser)Parse(string) error{
+func (this *CallParser) Parse(string) error {
 	return nil
+}
+
+func (this *CallParser) AfterUnmarshal() {
+	fmt.Println("CallParser AfterUnmarshal")
 }
 
 //define IEqualRuler interface
@@ -37,35 +46,42 @@ type IEqualRuler interface {
 
 //define EqualRulerA struct and EqualRulerB struct
 type EqualRulerA struct {
-	XMLName   xml.Name       `xml:"EqualRuleA"`
-	AName	string	`xml:"Name"`
-	IsMatchAnyString	bool	`xml:"MatchAny"`
-	MatchString	string	`xml:"Match"`
+	XMLName          xml.Name `xml:"EqualRuleA"`
+	AName            string   `xml:"Name"`
+	IsMatchAnyString bool     `xml:"MatchAny"`
+	MatchString      string   `xml:"Match"`
 }
 
-func (this *EqualRulerA)Equal(indata string) bool{
+func (this *EqualRulerA) Equal(indata string) bool {
 	return false
+}
+func (this *EqualRulerA) AfterUnmarshal() {
+	fmt.Println("EqualRulerA AfterUnmarshal")
 }
 
 type EqualRulerB struct {
-	XMLName   xml.Name       `xml:"EqualRuleB"`
-	BName	string	`xml:"Name"`
-	IsMatchAnyString	bool	`xml:"MatchAny"`
-	MatchString	string	`xml:"Match"`
+	XMLName          xml.Name `xml:"EqualRuleB"`
+	BName            string   `xml:"Name"`
+	IsMatchAnyString bool     `xml:"MatchAny"`
+	MatchString      string   `xml:"Match"`
 }
 
-func (this *EqualRulerB)Equal(indata string) bool{
+func (this *EqualRulerB) Equal(indata string) bool {
 	return false
 }
 
+//func (this *EqualRulerB) AfterUnmarshal() {
+//	fmt.Println("EqualRulerB AfterUnmarshal")
+//}
+
 type RootModel struct {
-	XMLName   xml.Name           `xml:"Root"`
+	XMLName xml.Name `xml:"Root"`
 
-	InstancePtrArray	[]*EqualRulerB `xml:"Rules>EqualRuleB"`
+	InstancePtrArray []*EqualRulerB `xml:"Rules>EqualRuleB"`
 
-	SingleInterface	IEqualRuler   `xml:"Factory.EqualRuler"`
-	InterfaceArray	[]IParser `xml:"Factory.Parser"`
-	InterfacePtrDeepChildren	[]IEqualRuler `xml:"EqualRulers>Factory.EqualRuler"`
+	SingleInterface          IEqualRuler   `xml:"Factory.EqualRuler"`
+	InterfaceArray           []IParser     `xml:"Factory.Parser"`
+	InterfacePtrDeepChildren []IEqualRuler `xml:"EqualRulers>Factory.EqualRuler"`
 }
 
 //define instance factory
@@ -90,7 +106,7 @@ func initXmlInstanceFactory() {
 }
 
 //test for Xml Deserialize
-func TestXmlDeserializer(t *testing.T){
+func TestXmlDeserializer(t *testing.T) {
 	testXml :=
 		`<Root>
 		<Rules>
@@ -146,83 +162,81 @@ func TestXmlDeserializer(t *testing.T){
 	defer disposeXmlInstanceFactory()
 	xmlDeserializer := NewDeserializer("Factory", instanceMap)
 	instance := &RootModel{}
-	err := xmlDeserializer.Deserialize([]byte(testXml),instance)
-	if err != nil{
+	err := xmlDeserializer.Deserialize([]byte(testXml), instance)
+	if err != nil {
 		t.Fail()
 	}
 
-	if instance.InstancePtrArray == nil || len(instance.InstancePtrArray) != 3{
+	if instance.InstancePtrArray == nil || len(instance.InstancePtrArray) != 3 {
 		t.Fail()
 	}
-	if instance.InstancePtrArray[0].BName != "arr1" ||instance.InstancePtrArray[0].MatchString != "callin1"{
+	if instance.InstancePtrArray[0].BName != "arr1" || instance.InstancePtrArray[0].MatchString != "callin1" {
 		t.Fail()
 	}
-	if instance.InstancePtrArray[1].BName != "arr2" ||instance.InstancePtrArray[1].MatchString != "callin2"{
+	if instance.InstancePtrArray[1].BName != "arr2" || instance.InstancePtrArray[1].MatchString != "callin2" {
 		t.Fail()
 	}
-	if instance.InstancePtrArray[2].BName != "arr3" ||instance.InstancePtrArray[2].MatchString != "callin3"{
+	if instance.InstancePtrArray[2].BName != "arr3" || instance.InstancePtrArray[2].MatchString != "callin3" {
 		t.Fail()
 	}
 
 	var ok bool
-	ruleA,ok := instance.SingleInterface.(*EqualRulerA)
-	if !ok{
+	ruleA, ok := instance.SingleInterface.(*EqualRulerA)
+	if !ok {
 		t.Fail()
 	}
-	if ruleA.AName != "singleInstance" || ruleA.MatchString != "callin"{
-		t.Fail()
-	}
-
-	parser,ok := instance.InterfaceArray[0].(*NotifyParser)
-	if !ok{
-		t.Fail()
-	}
-	if parser.Name != "pppp"{
-		t.Fail()
-	}
-	parser,ok = instance.InterfaceArray[1].(*NotifyParser)
-	if !ok{
-		t.Fail()
-	}
-	if parser.Name != "mmmm"{
-		t.Fail()
-	}
-	parser2,ok := instance.InterfaceArray[2].(*CallParser)
-	if !ok{
-		t.Fail()
-	}
-	if parser2.Index != 111{
-		t.Fail()
-	}
-	parser2,ok = instance.InterfaceArray[3].(*CallParser)
-	if !ok{
-		t.Fail()
-	}
-	if parser2.Index != 222{
+	if ruleA.AName != "singleInstance" || ruleA.MatchString != "callin" {
 		t.Fail()
 	}
 
-	ruleA2,ok := instance.InterfacePtrDeepChildren[0].(*EqualRulerA)
-	if !ok{
+	parser, ok := instance.InterfaceArray[0].(*NotifyParser)
+	if !ok {
 		t.Fail()
 	}
-	if ruleA2.AName != "sub1" || ruleA2.MatchString != "a1"{
+	if parser.Name != "pppp" {
 		t.Fail()
 	}
-	ruleB2,ok := instance.InterfacePtrDeepChildren[1].(*EqualRulerB)
-	if !ok{
+	parser, ok = instance.InterfaceArray[1].(*NotifyParser)
+	if !ok {
 		t.Fail()
 	}
-	if ruleB2.BName != "sub2" || ruleB2.MatchString != "b2"{
+	if parser.Name != "mmmm" {
 		t.Fail()
 	}
-	ruleA3,ok := instance.InterfacePtrDeepChildren[2].(*EqualRulerA)
-	if !ok{
+	parser2, ok := instance.InterfaceArray[2].(*CallParser)
+	if !ok {
 		t.Fail()
 	}
-	if ruleA3.AName != "sub3" || ruleA3.MatchString != "a3"{
+	if parser2.Index != 111 {
+		t.Fail()
+	}
+	parser2, ok = instance.InterfaceArray[3].(*CallParser)
+	if !ok {
+		t.Fail()
+	}
+	if parser2.Index != 222 {
+		t.Fail()
+	}
+
+	ruleA2, ok := instance.InterfacePtrDeepChildren[0].(*EqualRulerA)
+	if !ok {
+		t.Fail()
+	}
+	if ruleA2.AName != "sub1" || ruleA2.MatchString != "a1" {
+		t.Fail()
+	}
+	ruleB2, ok := instance.InterfacePtrDeepChildren[1].(*EqualRulerB)
+	if !ok {
+		t.Fail()
+	}
+	if ruleB2.BName != "sub2" || ruleB2.MatchString != "b2" {
+		t.Fail()
+	}
+	ruleA3, ok := instance.InterfacePtrDeepChildren[2].(*EqualRulerA)
+	if !ok {
+		t.Fail()
+	}
+	if ruleA3.AName != "sub3" || ruleA3.MatchString != "a3" {
 		t.Fail()
 	}
 }
-
-

@@ -1,9 +1,5 @@
 package xmlDeserializer
 
-type AfterUnmarshaler interface {
+type IXmlUnmarshaler interface {
 	AfterUnmarshal()
-}
-
-type BeforeUnmarshaler interface {
-	BeforeUnmarshal()
 }
