@@ -274,7 +274,10 @@ func (this *Deserializer) parseByElement(root *etree.Element, instance interface
 
 	unmarsher, ok := instance.(IXmlUnmarshaler)
 	if ok {
-		unmarsher.AfterUnmarshal()
+		err := unmarsher.AfterUnmarshal()
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

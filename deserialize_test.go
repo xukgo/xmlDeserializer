@@ -21,8 +21,9 @@ func (this *NotifyParser) Parse(string) error {
 	return nil
 }
 
-func (this *NotifyParser) AfterUnmarshal() {
+func (this *NotifyParser) AfterUnmarshal() error {
 	fmt.Println("NotifyParser AfterUnmarshal")
+	return nil
 }
 
 //define NotifyParser struct
@@ -35,8 +36,9 @@ func (this *CallParser) Parse(string) error {
 	return nil
 }
 
-func (this *CallParser) AfterUnmarshal() {
+func (this *CallParser) AfterUnmarshal() error {
 	fmt.Println("CallParser AfterUnmarshal")
+	return nil
 }
 
 //define IEqualRuler interface
@@ -55,8 +57,9 @@ type EqualRulerA struct {
 func (this *EqualRulerA) Equal(indata string) bool {
 	return false
 }
-func (this *EqualRulerA) AfterUnmarshal() {
+func (this *EqualRulerA) AfterUnmarshal() error {
 	fmt.Println("EqualRulerA AfterUnmarshal")
+	return nil
 }
 
 type EqualRulerB struct {
