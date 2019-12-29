@@ -1,8 +1,9 @@
-package xmlDeserializer
+package unitTest
 
 import (
 	"encoding/xml"
 	"fmt"
+	xmlDeserializer2 "github.com/xukgo/xmlDeserializer"
 	"testing"
 )
 
@@ -163,7 +164,7 @@ func TestXmlDeserializer(t *testing.T) {
 
 	initXmlInstanceFactory()
 	defer disposeXmlInstanceFactory()
-	xmlDeserializer := NewDeserializer("Factory", instanceMap)
+	xmlDeserializer := xmlDeserializer2.NewDeserializer("Factory", instanceMap)
 	instance := &RootModel{}
 	err := xmlDeserializer.Deserialize([]byte(testXml), instance)
 	if err != nil {
