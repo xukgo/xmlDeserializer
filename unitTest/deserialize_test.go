@@ -78,14 +78,24 @@ func (this *EqualRulerB) Equal(indata string) bool {
 //	fmt.Println("EqualRulerB AfterUnmarshal")
 //}
 
+type WrapEqualRuler struct {
+	XMLName    xml.Name    `xml:"WrapRuler"`
+	EmbedRuler IEqualRuler `xml:"Factory.EqualRuler"`
+}
+
+func (this *WrapEqualRuler) AfterUnmarshal() error {
+	return nil
+}
+
 type RootModel struct {
 	XMLName xml.Name `xml:"Root"`
 
 	InstancePtrArray []*EqualRulerB `xml:"Rules>EqualRuleB"`
 
-	SingleInterface          IEqualRuler   `xml:"Factory.EqualRuler"`
-	InterfaceArray           []IParser     `xml:"Factory.Parser"`
-	InterfacePtrDeepChildren []IEqualRuler `xml:"EqualRulers>Factory.EqualRuler"`
+	SingleInterface          IEqualRuler     `xml:"Factory.EqualRuler"`
+	InterfaceArray           []IParser       `xml:"Factory.Parser"`
+	InterfacePtrDeepChildren []IEqualRuler   `xml:"EqualRulers>Factory.EqualRuler"`
+	WrapRuler                *WrapEqualRuler `xml:"WrapRuler"`
 }
 
 //define instance factory
@@ -160,6 +170,10 @@ func TestXmlDeserializer(t *testing.T) {
 				<Match>a3</Match>
 			</EqualRuleA>
 		</EqualRulers>
+		<WrapRuler>
+			<Name>sub3</Name>
+			<Match>a3</Match>
+		</WrapRuler>
 	</Root>`
 
 	initXmlInstanceFactory()
@@ -243,4 +257,13 @@ func TestXmlDeserializer(t *testing.T) {
 	if ruleA3.AName != "sub3" || ruleA3.MatchString != "a3" {
 		t.Fail()
 	}
+}
+
+func TestXmlWrapNodeName(t *testing.T) {
+	xmlstr := `<?xml version="1.0" encoding="utf-8"?>
+<Config>
+    <Default key="SW_RETRY" val="1"/>
+    <Default key="RDGW_TIMEOUT" val="2000"/>
+</Config>`
+	fmt.Println(xmlDeserializer2.WrapNodeName(xmlstr, "root"))
 }

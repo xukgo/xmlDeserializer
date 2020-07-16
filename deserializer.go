@@ -81,10 +81,21 @@ func (this *Deserializer) getMatchTagNodes(root *etree.Element, codeXmlTag strin
 
 func (this *Deserializer) parseStrcutPtr(root *etree.Element, instance interface{}, tagName string) error {
 	node := getChildByTagName(root, tagName)
-	err := this.parseByElement(node, instance)
-	if err != nil {
-		return err
+
+	unmarsher, ok := instance.(IUnmarshaler)
+	if ok {
+		xmlStr := GetElementXml(node, true)
+		err := unmarsher.DeserializeXML(xmlStr, this.factory)
+		if err != nil {
+			return err
+		}
+	} else {
+		err := this.parseByElement(node, instance)
+		if err != nil {
+			return err
+		}
 	}
+
 	return nil
 }
 
@@ -103,12 +114,22 @@ func (this *Deserializer) parsePrefixXmlInterfaceField(root *etree.Element, fiel
 	if newInstance == nil {
 		return fmt.Errorf("resolveInstance by %s return nil", xmlTagName)
 	}
-	err := unmarshalByElement(selectNode, newInstance)
-	if err != nil {
-		return err
+
+	unmarsher, ok := newInstance.(IUnmarshaler)
+	if ok {
+		xmlStr := GetElementXml(selectNode, true)
+		err := unmarsher.DeserializeXML(xmlStr, this.factory)
+		if err != nil {
+			return err
+		}
+	} else {
+		err := unmarshalByElement(selectNode, newInstance)
+		if err != nil {
+			return err
+		}
 	}
 
-	err = this.parseByElement(selectNode, newInstance)
+	err := this.parseByElement(selectNode, newInstance)
 	if err != nil {
 		return err
 	}
@@ -130,12 +151,22 @@ func (this *Deserializer) parsePrefixXmlInterfaceSliceField(root *etree.Element,
 		if newInstance == nil {
 			return fmt.Errorf("resolveInstance by %s return nil", xmlTagName)
 		}
-		err := unmarshalByElement(node, newInstance)
-		if err != nil {
-			return err
+
+		unmarsher, ok := newInstance.(IUnmarshaler)
+		if ok {
+			xmlStr := GetElementXml(node, true)
+			err := unmarsher.DeserializeXML(xmlStr, this.factory)
+			if err != nil {
+				return err
+			}
+		} else {
+			err := unmarshalByElement(node, newInstance)
+			if err != nil {
+				return err
+			}
 		}
 
-		err = this.parseByElement(node, newInstance)
+		err := this.parseByElement(node, newInstance)
 		if err != nil {
 			return err
 		}
@@ -272,7 +303,7 @@ func (this *Deserializer) parseByElement(root *etree.Element, instance interface
 		}
 	}
 
-	unmarsher, ok := instance.(IXmlUnmarshaler)
+	unmarsher, ok := instance.(IAfterUnmarshaler)
 	if ok {
 		err := unmarsher.AfterUnmarshal()
 		if err != nil {

@@ -1,6 +1,7 @@
 package xmlDeserializer
 
 import (
+	"bytes"
 	"encoding/xml"
 	"fmt"
 	"github.com/beevik/etree"
@@ -102,4 +103,20 @@ func resolveInstance(factory map[string]map[string]interface{}, typ string, name
 	tp := reflect.ValueOf(resIns).Type()
 	h := reflect.New(tp).Interface()
 	return h
+}
+
+func WrapNodeName(xmlstr string, wrapName string) string {
+	endIndex := strings.Index(xmlstr, "?>")
+	if endIndex > 0 {
+		xmlstr = xmlstr[endIndex+2:]
+	}
+	bf := new(bytes.Buffer)
+	if endIndex > 0 {
+		bf.WriteString(`<?xml version="1.0" encoding="utf-8"?>`)
+		bf.WriteString("\r\n")
+	}
+	bf.WriteString(fmt.Sprintf("<%s>", wrapName))
+	bf.WriteString(xmlstr)
+	bf.WriteString(fmt.Sprintf("\r\n</%s>", wrapName))
+	return bf.String()
 }
