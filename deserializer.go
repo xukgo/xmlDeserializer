@@ -263,46 +263,47 @@ func (this *Deserializer) parseNotPrefixXmlField(root *etree.Element, field refl
 }
 
 func (this *Deserializer) parseByElement(root *etree.Element, instance interface{}) error {
-	var err error
-	v := reflect.ValueOf(instance).Elem() // the struct variable
+	if root == nil {
 
-	for i := 0; i < v.NumField(); i++ {
-		fieldInfo := v.Type().Field(i) // a reflect.StructField
-		theField := v.FieldByName(fieldInfo.Name)
-		fieldKind := theField.Kind()
-		//fmt.Println(fieldKind)
-		if fieldKind != reflect.Ptr && fieldKind != reflect.Struct && fieldKind != reflect.Interface && fieldKind != reflect.Slice {
-			continue
-		}
-		fieldType := theField.Type()
-		//fmt.Println(fieldType)
-		if fieldType == xmlNameType {
-			continue
-		}
+		var err error
+		v := reflect.ValueOf(instance).Elem() // the struct variable
+		for i := 0; i < v.NumField(); i++ {
+			fieldInfo := v.Type().Field(i) // a reflect.StructField
+			theField := v.FieldByName(fieldInfo.Name)
+			fieldKind := theField.Kind()
+			//fmt.Println(fieldKind)
+			if fieldKind != reflect.Ptr && fieldKind != reflect.Struct && fieldKind != reflect.Interface && fieldKind != reflect.Slice {
+				continue
+			}
+			fieldType := theField.Type()
+			//fmt.Println(fieldType)
+			if fieldType == xmlNameType {
+				continue
+			}
 
-		tag := fieldInfo.Tag // a reflect.StructTag
-		xmlTagContent := tag.Get("xml")
+			tag := fieldInfo.Tag // a reflect.StructTag
+			xmlTagContent := tag.Get("xml")
 
-		//去掉逗号后面内容 如 `xml:"nodeName,omitempty"`
-		arr := strings.Split(xmlTagContent, ",")
-		xmlTagName := arr[0]
+			//去掉逗号后面内容 如 `xml:"nodeName,omitempty"`
+			arr := strings.Split(xmlTagContent, ",")
+			xmlTagName := arr[0]
 
-		//不是factory前缀
-		if !checkIsPrefixXmlTag(xmlTagName, this.prefix) {
-			err = this.parseNotPrefixXmlField(root, theField, xmlTagName)
+			//不是factory前缀
+			if !checkIsPrefixXmlTag(xmlTagName, this.prefix) {
+				err = this.parseNotPrefixXmlField(root, theField, xmlTagName)
+				if err != nil {
+					return err
+				}
+				continue
+			}
+
+			//下面处理factory前缀的，目前只允许interface和它对应的数组
+			err = this.parsePrefixXmlField(root, theField, xmlTagName)
 			if err != nil {
 				return err
 			}
-			continue
-		}
-
-		//下面处理factory前缀的，目前只允许interface和它对应的数组
-		err = this.parsePrefixXmlField(root, theField, xmlTagName)
-		if err != nil {
-			return err
 		}
 	}
-
 	unmarsher, ok := instance.(IAfterUnmarshaler)
 	if ok {
 		err := unmarsher.AfterUnmarshal()
