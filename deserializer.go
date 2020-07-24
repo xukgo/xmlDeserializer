@@ -263,8 +263,7 @@ func (this *Deserializer) parseNotPrefixXmlField(root *etree.Element, field refl
 }
 
 func (this *Deserializer) parseByElement(root *etree.Element, instance interface{}) error {
-	if root == nil {
-
+	if root != nil {
 		var err error
 		v := reflect.ValueOf(instance).Elem() // the struct variable
 		for i := 0; i < v.NumField(); i++ {
